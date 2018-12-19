@@ -1,0 +1,44 @@
+from mayavi import mlab
+import math, time, random
+
+def move(x, y, z, dt=.01):
+    sigma, roe, beta = 10, 28, 8/3
+
+    dx = (sigma * (y - x)) * dt
+    dy = (x * (roe - z) - y) * dt
+    dz = (x * y - beta * z) * dt
+
+    x += dx
+    y += dy
+    z += dz
+
+    return x, y, z
+
+x, y, z, = [1], [1], [1]
+points = []
+
+fig = mlab.figure(figure="SWARM", size=(800,800))
+for i in range(60):
+    x, y, z, = [], [], []
+    x_1, y_1, z_1 = random.randrange(-10, 10), random.randrange(-10, 10), random.randrange(-10, 10)
+    x.append(x_1)
+    y.append(y_1)
+    z.append(z_1)
+    color = random.random(), random.random(), random.random()
+    point = mlab.points3d(x, y, z, scale_factor=2, color=color)
+    package = x, y, z, point
+    points.append(package)
+
+@mlab.animate(delay=50)
+def anim():
+    for i in range(1000):
+        for package in points:
+            x_i, y_i, z_i = move(package[0][i], package[1][i], package[2][i])
+            package[0].append(x_i)
+            package[1].append(y_i)
+            package[2].append(z_i)
+            package[3].mlab_source.trait_set(x=x_i, y=y_i, z=z_i)
+        yield
+
+anim()
+mlab.show()
